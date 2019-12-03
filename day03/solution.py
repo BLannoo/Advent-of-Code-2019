@@ -51,14 +51,30 @@ class Test(TestCase):
             )
         )
 
-    def test_assignement(self):
+    def test_assignement_1(self):
         with open('data.txt') as file:
             directions1 = file.readline().split(',')
             directions2 = file.readline().split(',')
         self.assertEqual(
-            0,
+            489,
             find_closest(
                 execute_directions(directions1),
                 execute_directions(directions2)
             )
+        )
+
+    def test_assignement_2(self):
+        with open('data.txt') as file:
+            directions1 = file.readline().split(',')
+            directions2 = file.readline().split(',')
+        path1 = execute_directions(directions1)
+        path2 = execute_directions(directions2)
+        intersections = set(path1).intersection(set(path2))
+        self.assertEqual(
+            93654,
+            min([
+                path1.index(intersection) + path2.index(intersection)
+                for intersection in intersections
+                if intersection != (0, 0)
+            ])
         )
