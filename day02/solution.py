@@ -1,3 +1,6 @@
+from unittest import TestCase
+
+
 def read_input():
     with open('data.txt') as file:
         return [
@@ -6,45 +9,63 @@ def read_input():
         ]
 
 
-def execute(intcode, position):
-    # print('executing position: ', position)
-    opcode = intcode[position]
-    # print('opcode is: ', opcode)
-    input1 = intcode[intcode[position + 1]]
-    # print('input1 is: ', input1)
-    input2 = intcode[intcode[position + 2]]
-    # print('input2 is: ', input2)
-    if opcode == 1:
-        result = input1 + input2
-    if opcode == 2:
-        result = input1 * input2
-    # print('result is:', result)
-    output = intcode[position + 3]
-    # print('output is:', output)
-    intcode[output] = result
-    # print('this results in: ', intcode)
+opcodes = {
+    1: (lambda intcode: intcode.opcode_1_2(lambda a, b: a + b)),
+    2: (lambda intcode: intcode.opcode_1_2(lambda a, b: a * b)),
+    99: (lambda intcode: intcode.opcode_99()),
+}
 
 
-def run_program(input):
-    i = 0
-    while input[i] != 99:
-        execute(input, i)
-        i += 4
-    # print('found 99: ', input[0])
-    return input[0]
+class Intcode:
+    def __init__(self, instructions):
+        self.__instructions = instructions
+        self.__pointer = 0
+        self.__halted = False
+
+    def run_program(self):
+        while not self.__halted:
+            opcode = self.__instructions[self.__pointer]
+            opcodes[opcode](self)
+        return self.__instructions[0]
+
+    def opcode_1_2(self, combinator):
+        input1 = self.__instructions[self.__instructions[self.__pointer + 1]]
+        input2 = self.__instructions[self.__instructions[self.__pointer + 2]]
+        result = combinator(input1, input2)
+        output = self.__instructions[self.__pointer + 3]
+        self.__instructions[output] = result
+        self.__pointer += 4
+
+    def opcode_99(self):
+        self.__halted = True
 
 
-print('example 0: ', run_program([1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50]))
+class TestSilver(TestCase):
+    def test_example_0(self):
+        self.assertEqual(
+            Intcode([1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50]).run_program(),
+            3500
+        )
 
-data = read_input()
-data[1] = 12
-data[2] = 2
-print('assignment 1: ', run_program(data))
-
-for noun in range(100):
-    for verb in range(100):
+    def test_assignment(self):
         data = read_input()
-        data[1] = noun
-        data[2] = verb
-        if run_program(data) == 19690720:
-            print('solution found (', 100 * noun + verb, '): noun=', noun, ' and verb=', verb)
+        data[1] = 12
+        data[2] = 2
+        self.assertEqual(
+            Intcode(data).run_program(),
+            3085697
+        )
+
+
+class TestGold(TestCase):
+    def test_assignement(self):
+        for noun in range(100):
+            for verb in range(100):
+                data = read_input()
+                data[1] = noun
+                data[2] = verb
+                if Intcode(data).run_program() == 19690720:
+                    self.assertEqual(
+                        100 * noun + verb,
+                        9425
+                    )
