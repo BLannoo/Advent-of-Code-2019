@@ -1,43 +1,6 @@
 from unittest import TestCase
 
-
-def read_input():
-    with open('data.txt') as file:
-        return [
-            int(code)
-            for code in file.readline().split(',')
-        ]
-
-
-opcodes = {
-    1: (lambda intcode: intcode.opcode_1_2(lambda a, b: a + b)),
-    2: (lambda intcode: intcode.opcode_1_2(lambda a, b: a * b)),
-    99: (lambda intcode: intcode.opcode_99()),
-}
-
-
-class Intcode:
-    def __init__(self, instructions):
-        self.__instructions = instructions
-        self.__pointer = 0
-        self.__halted = False
-
-    def run_program(self):
-        while not self.__halted:
-            opcode = self.__instructions[self.__pointer]
-            opcodes[opcode](self)
-        return self.__instructions[0]
-
-    def opcode_1_2(self, combinator):
-        input1 = self.__instructions[self.__instructions[self.__pointer + 1]]
-        input2 = self.__instructions[self.__instructions[self.__pointer + 2]]
-        result = combinator(input1, input2)
-        output = self.__instructions[self.__pointer + 3]
-        self.__instructions[output] = result
-        self.__pointer += 4
-
-    def opcode_99(self):
-        self.__halted = True
+from shared.intcode import Intcode, read_input
 
 
 class TestSilver(TestCase):
