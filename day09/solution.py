@@ -51,3 +51,14 @@ class TestSilver(TestCase):
             ).run_program(),
             [2870072642]
         )
+
+
+class TestGold(TestCase):
+    def test_assignement(self):
+        self.assertEqual(
+            Intcode(
+                read_data(),
+                [2]
+            ).run_program(),
+            [58534]
+        )
