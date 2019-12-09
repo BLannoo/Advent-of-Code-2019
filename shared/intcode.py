@@ -84,7 +84,7 @@ class Intcode:
         input1 = self.get_parameter(1)
         input2 = self.get_parameter(2)
         result = combinator(input1, input2)
-        output = self.get_instruction(self.__pointer + 3)
+        output = self.location_memory_access(3)
         self.set_instruction(output, result)
         self.__pointer += 4
 
@@ -111,7 +111,7 @@ class Intcode:
     def opcode_7_8(self, comparator):
         input1 = self.get_parameter(1)
         input2 = self.get_parameter(2)
-        output = self.get_instruction(self.__pointer + 3)
+        output = self.location_memory_access(3)
         if comparator(input1, input2):
             self.set_instruction(output, 1)
         else:

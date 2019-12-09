@@ -49,5 +49,5 @@ class TestSilver(TestCase):
                 read_data(),
                 [1]
             ).run_program(),
-            []
+            [2870072642]
         )
