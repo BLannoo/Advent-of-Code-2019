@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from shared.intcode import Intcode, read_input
+from shared.intcode import Intcode, read_data
 
 
 class TestSilver(TestCase):
@@ -20,7 +20,7 @@ class TestSilver(TestCase):
 
     def test_assignment(self):
         self.assertEqual(
-            Intcode(read_input(), [1]).run_program(),
+            Intcode(read_data(), [1]).run_program(),
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 13285749]
         )
 
@@ -131,6 +131,6 @@ class TestGold(TestCase):
 
     def test_assignement(self):
         self.assertEqual(
-            Intcode(read_input(), [5]).run_program(),
+            Intcode(read_data(), [5]).run_program(),
             [5000972]
         )

@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from shared.intcode import Intcode, read_input
+from shared.intcode import Intcode, read_data
 
 
 class TestSilver(TestCase):
@@ -11,7 +11,7 @@ class TestSilver(TestCase):
         )
 
     def test_assignment(self):
-        data = read_input()
+        data = read_data()
         data[1] = 12
         data[2] = 2
         self.assertEqual(
@@ -24,7 +24,7 @@ class TestGold(TestCase):
     def test_assignement(self):
         for noun in range(100):
             for verb in range(100):
-                data = read_input()
+                data = read_data()
                 data[1] = noun
                 data[2] = verb
                 if Intcode(data).run_program() == 19690720:

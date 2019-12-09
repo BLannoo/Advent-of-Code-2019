@@ -1,7 +1,7 @@
 from itertools import permutations
 from unittest import TestCase
 
-from shared.intcode import Intcode, read_input
+from shared.intcode import Intcode, read_data
 
 
 def amplification_sequence(phase_sequence, program):
@@ -56,7 +56,7 @@ class TestSilver(TestCase):
         )
 
     def test_assignment(self):
-        program = read_input()
+        program = read_data()
 
         self.assertEqual(
             max([
@@ -95,7 +95,7 @@ class TestGold(TestCase):
 
     # 2526030 to low due to range(5, 9)
     def test_assignment(self):
-        program = read_input()
+        program = read_data()
 
         self.assertEqual(
             max([
