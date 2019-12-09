@@ -1,3 +1,6 @@
+from copy import copy
+
+
 def read_input():
     with open('data.txt') as file:
         return [
@@ -20,21 +23,27 @@ opcodes = {
 
 
 class Intcode:
-    def __init__(self, instructions, input=0):
-        self.__instructions = instructions
-        self.__input = input
+    def __init__(self, instructions, inputs=[0]):
+        self.__instructions = copy(instructions)
+        self.__inputs = inputs
+        self.__input_pointer = 0
         self.output = []
         self.__pointer = 0
-        self.__halted = False
+        self.input_required = False
+        self.halted = False
 
     def run_program(self):
-        while not self.__halted:
+        while not self.halted and not self.input_required:
             opcodes[self.opcode()](self)
             # print(self.__instructions, self.__pointer)
         if len(self.output) == 0:
             return self.__instructions[0]
         else:
             return self.output
+
+    def add_input(self, values):
+        self.__inputs.extend(values)
+        self.input_required = False
 
     def opcode(self):
         return self.__instructions[self.__pointer] % 100
@@ -53,8 +62,12 @@ class Intcode:
         self.__pointer += 4
 
     def opcode_3(self):
+        if self.__input_pointer >= len(self.__inputs):
+            self.input_required = True
+            return
         location = self.__instructions[self.__pointer + 1]
-        self.__instructions[location] = self.__input
+        self.__instructions[location] = self.__inputs[self.__input_pointer]
+        self.__input_pointer += 1
         self.__pointer += 2
 
     def opcode_4(self):
@@ -79,4 +92,4 @@ class Intcode:
         self.__pointer += 4
 
     def opcode_99(self):
-        self.__halted = True
+        self.halted = True
