@@ -7,7 +7,7 @@ from pytesseract import image_to_string
 
 
 def read_data():
-    with open('data.txt') as file:
+    with open('koenraad.txt') as file:
         return file.read()
 
 
