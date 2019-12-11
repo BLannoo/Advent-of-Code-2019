@@ -1,13 +1,10 @@
 from unittest import TestCase
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-from PIL import Image, ImageFilter
-from pytesseract import image_to_string
+from shared.ocr import ocr
 
 
 def read_data():
-    with open('koenraad.txt') as file:
+    with open('data.txt') as file:
         return file.read()
 
 
@@ -60,36 +57,10 @@ class TestSilver(TestCase):
         )
 
 
-def add_white_border(image):
-    image = [
-        [0, *line, 0]
-        for line in image
-    ]
-    wide = len(image[0])
-    image = [[0] * wide] + image + [[0] * wide]
-    return image
-
-
-def render_image(image):
-    sns.heatmap(image, cbar=False, yticklabels=False, xticklabels=False)
-    plt.axis('equal')
-    plt.savefig('temp.png', format='png')
-    return Image.open('temp.png')
-
-
 class TestGold(TestCase):
-
-    # requires:
-    # pip install seaborn pytesseract
-    # brew install tesseract
     def test_assignement(self):
         image = solve_gold(read_data(), wide=25, tall=6)
-        image = add_white_border(image)
-        im = render_image(image)
-        im.show()
-        im = im.filter(ImageFilter.GaussianBlur(5))
-        im.show()
         self.assertEqual(
-            image_to_string(im),
+            ocr(image),
             'LBRCE'
         )

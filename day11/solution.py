@@ -1,6 +1,9 @@
 from unittest import TestCase
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from shared.intcode import read_data, Intcode
+from shared.ocr import ocr
 
 BLACK = 0
 WHITE = 1
@@ -84,10 +87,34 @@ class TestGold(TestCase):
 
         solve(hull)
 
-        for x in range(-100, 100):
-            for y in range(-50, 50):
-                if hull.get_color((y, x)) == WHITE:
+        white_panels = [
+            panel
+            for panel in hull.painted.keys()
+            if hull.painted[panel] == WHITE
+        ]
+
+        image = []
+        for y in range(
+                min([panel[1] for panel in white_panels]),
+                max([panel[1] for panel in white_panels]) + 1
+        ):
+            row = []
+            for x in range(
+                    min([panel[0] for panel in white_panels]),
+                    max([panel[0] for panel in white_panels]) + 1
+            ):
+                row.append(-hull.get_color((x, y)))
+            image.append(row)
+
+        for line in image:
+            for cell in line:
+                if cell == 0:
                     print('#', end='')
                 else:
                     print('.', end='')
             print()
+
+        self.assertEqual(
+            ocr(image, blur=4),
+            'BLULZJLZ'
+        )
