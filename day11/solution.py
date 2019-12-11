@@ -36,8 +36,8 @@ class Robot:
 
 
 class Hull:
-    def __init__(self):
-        self.painted = {}
+    def __init__(self, original_painting={}):
+        self.painted = original_painting
 
     def paint(self, position, color):
         self.painted[position] = color
@@ -49,23 +49,45 @@ class Hull:
             return BLACK
 
 
+def solve(hull):
+    intcode = Intcode(read_data(), inputs=[])
+    robot = Robot((0, 0), UP)
+    while not intcode.halted:
+        intcode.run_program()
+        if len(intcode.output) >= 2:
+            color = intcode.output.pop(0)
+            turn = intcode.output.pop(0)
+            hull.paint(robot.position, color)
+            robot.turn(turn)
+            robot.move()
+
+        intcode.add_input([hull.get_color(robot.position)])
+
+
 class TestSilver(TestCase):
     def test_assignement(self):
-        intcode = Intcode(read_data(), inputs=[])
         hull = Hull()
-        robot = Robot((0, 0), UP)
-        while not intcode.halted:
-            intcode.run_program()
-            if len(intcode.output) >= 2:
-                color = intcode.output.pop(0)
-                turn = intcode.output.pop(0)
-                hull.paint(robot.position, color)
-                robot.turn(turn)
-                robot.move()
 
-            intcode.add_input([hull.get_color(robot.position)])
+        solve(hull)
 
         self.assertEqual(
             len(hull.painted),
             1863
         )
+
+
+class TestGold(TestCase):
+
+    # BLULZJLZ
+    def test_assignement(self):
+        hull = Hull({(0, 0): WHITE})
+
+        solve(hull)
+
+        for x in range(-100, 100):
+            for y in range(-50, 50):
+                if hull.get_color((y, x)) == WHITE:
+                    print('#', end='')
+                else:
+                    print('.', end='')
+            print()
