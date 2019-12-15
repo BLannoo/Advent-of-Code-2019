@@ -1,8 +1,9 @@
 from collections import defaultdict
 from copy import copy
+from typing import List
 
 
-def read_data():
+def read_data() -> List[int]:
     with open('data.txt') as file:
         return [
             int(code)
