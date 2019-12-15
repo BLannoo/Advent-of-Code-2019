@@ -2,6 +2,8 @@ from math import ceil
 from typing import Tuple
 from unittest import TestCase
 
+from numpy import mean
+
 
 class Reaction:
     def __init__(self, output_chemical: Tuple[str, int], input_chemicals: Tuple):
@@ -51,9 +53,9 @@ def needed_chemicals(needed):
     ]
 
 
-def solve_silver(reactions):
+def solve_silver(reactions, fuel_goal=1):
     needed = {component: 0 for component in reactions.keys()}
-    needed['FUEL'] = 1
+    needed['FUEL'] = fuel_goal
     needed['ORE'] = 0
     extra = {component: 0 for component in reactions.keys()}
     while len(needed_chemicals(needed)) != 0:
@@ -100,4 +102,37 @@ class TestSilver(TestCase):
         self.assertEqual(
             needed['ORE'],
             1037742
+        )
+
+
+class TestGold(TestCase):
+    def test_assignement(self):
+        reactions = read_rules('data.txt')
+        needed = solve_silver(reactions, int(1_000_000_000_000/1_037_742))
+        self.assertEqual(
+            needed['ORE'],
+            612_856_043_188
+        )
+        needed = solve_silver(reactions, int(1_000_000_000_000/1_000_000))
+        self.assertEqual(
+            needed['ORE'],
+            635_987_164_066
+        )
+        needed = solve_silver(reactions, int(1_000_000_000_000/500_000))
+        self.assertEqual(
+            needed['ORE'],
+            1_271_973_764_454
+        )
+        lower_bound = int(1_000_000_000_000/1_000_000)
+        upper_bound = int(1_000_000_000_000/500_000)
+        bisect = int(mean([lower_bound, upper_bound]))
+        while bisect != lower_bound:
+            if solve_silver(reactions, fuel_goal=bisect)['ORE'] > 1_000_000_000_000:
+                upper_bound = bisect
+            else:
+                lower_bound = bisect
+            bisect = int(mean([lower_bound, upper_bound]))
+        self.assertEqual(
+            bisect,
+            1572358
         )
