@@ -69,3 +69,47 @@ class TestSilver(TestCase):
             fft_x(data, 100)[:8],
             '69549155'
         )
+
+
+def upper_triangular_matrix(n):
+    return np.triu(np.ones((n, n)))
+
+
+def solve_gold(data):
+    index = int(data[:7])
+    data_expanded = data * 10_000
+    data_selection = data_expanded[index:]
+    example = digits(data_selection)
+    size = len(example)
+    temp = np.ones((1, size))
+    # m = upper_triangular_matrix(size)
+    for _ in range(99):
+        temp = np.cumsum(temp) % 10
+    result = str(int(temp.dot(example) % 10))
+    for i in range(1, 8):
+        result += str(int(temp[:-i].dot(example[i:]) % 10))
+    return result
+
+
+class TestGold(TestCase):
+    def test_example1(self):
+        data = '03036732577212944063491565474664'
+        self.assertEqual(
+            solve_gold(data),
+            '84462026'
+        )
+
+    def test_example3(self):
+        data = '03081770884921959731165446850517'
+        self.assertEqual(
+            solve_gold(data),
+            '53553731'
+        )
+
+    def test_assignement(self):
+        with open('data.txt') as file:
+            data = file.readline()
+        self.assertEqual(
+            solve_gold(data),
+            '83253465'
+        )
