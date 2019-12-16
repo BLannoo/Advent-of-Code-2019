@@ -1,3 +1,5 @@
+numpy
 seaborn
 pytesseract
 pygame==2.0.0.dev3
+nptyping
