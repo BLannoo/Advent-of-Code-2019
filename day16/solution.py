@@ -71,18 +71,24 @@ class TestSilver(TestCase):
         )
 
 
-def upper_triangular_matrix(n):
-    return np.triu(np.ones((n, n)))
-
-
+# This solution is based on a couple of realizations:
+# 1a) The input data is 651 digits long * 10_000 this makes for a 6_510_000 digit input
+# 1b) The message_offset is 5_975_677
+# 1c) message_offset >>> 6_510_000 / 2
+# 1d) Thus the transition matrix is an upper triangular matrix of 1s (UT-1)
+# 1e) So another way to formulate the problem is: ? = UT-1^100 * input
+# 2) different rows in UT-1^N contain the same values except 1 shifted
+# 3a) the values in 1 row of UT-1^2 are 1,2,3, ...
+# 3b) the values in 1 row of UT-1^3 are 1,3,6, ...
+# 3c) the values in 1 row of UT-1^4 are 1,4,10, ...
+# 3d) This pattern is the cumsum(cumsum(...))
 def solve_gold(data):
-    index = int(data[:7])
+    message_offset = int(data[:7])
     data_expanded = data * 10_000
-    data_selection = data_expanded[index:]
+    data_selection = data_expanded[message_offset:]
     example = digits(data_selection)
     size = len(example)
     temp = np.ones((1, size))
-    # m = upper_triangular_matrix(size)
     for _ in range(99):
         temp = np.cumsum(temp) % 10
     result = str(int(temp.dot(example) % 10))
