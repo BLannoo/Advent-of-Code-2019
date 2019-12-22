@@ -26,7 +26,7 @@ opcodes = {
 
 
 class Intcode:
-    def __init__(self, instructions, inputs=[0]):
+    def __init__(self, instructions, inputs: List[int] = [0]):
         self.__instructions = copy(instructions)
         self.__extra_instructions = defaultdict(lambda: 0)
         self.__inputs = inputs
@@ -47,7 +47,7 @@ class Intcode:
         else:
             return self.output
 
-    def add_input(self, values):
+    def add_input(self, values: List[int]) -> None:
         self.__inputs.extend(values)
         self.input_required = False
 
@@ -126,3 +126,13 @@ class Intcode:
 
     def opcode_99(self):
         self.halted = True
+
+    def output_ascii(self) -> str:
+        return ''.join([
+            chr(code)
+            for code in self.output
+            if code < 127
+        ])
+
+    def input_ascii(self, value: str) -> None:
+        self.add_input([ord(char) for char in value])
