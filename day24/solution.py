@@ -1,5 +1,74 @@
 import unittest
 
+DATA = '''
+    .##.#
+    ###..
+    #...#
+    ##.#.
+    .###.
+'''.strip(' \n').replace(' ', '')
+
+
+class TestGold(unittest.TestCase):
+    EXAMPLE_0 = '''
+        ....#
+        #..#.
+        #..##
+        ..#..
+        #....
+    '''.strip(' \n').replace(' ', '')
+
+
+    def test_code_decode(self):
+        self.assertEqual(
+            self.EXAMPLE_0,
+            decode_world(encode_world(self.EXAMPLE_0))
+        )
+
+    def test_neighbours_19(self):
+        self.assertSetEqual(
+            {(3, 4, 0), (4, 3, 0), (2, 3, 0), (3, 2, 0)},
+            generate_neighbouring_locations((3, 3, 0))
+        )
+
+    def test_neighbours_G(self):
+        self.assertSetEqual(
+            {(1, 0, -1), (0, 1, -1), (2, 1, -1), (1, 2, -1)},
+            generate_neighbouring_locations((1, 1, -1))
+        )
+
+    def test_neighbours_D(self):
+        self.assertSetEqual(
+            {(2, 1, 0), (2, 0, -1), (4, 0, -1), (3, 1, -1)},
+            generate_neighbouring_locations((3, 0, -1))
+        )
+
+    def test_neighbours_E(self):
+        self.assertSetEqual(
+            {(2, 1, 0), (3, 0, -1), (3, 2, 0), (4, 1, -1)},
+            generate_neighbouring_locations((4, 0, -1))
+        )
+
+    def test_neighbours_14(self):
+        self.assertSetEqual(
+            {(3, 1, 0), (4, 0, -1), (4, 1, -1), (4, 2, -1), (4, 3, -1), (4, 4, -1), (4, 2, 0), (3, 3, 0)},
+            generate_neighbouring_locations((3, 2, 0))
+        )
+
+    def test_example_0_tick(self):
+        bugs = encode_world(self.EXAMPLE_0)
+        bugs = multi_tick(bugs, 10)
+        self.assertEqual(
+            99,
+            len(bugs)
+        )
+
+    def test_assignement(self):
+        self.assertEqual(
+            1953,
+            len(multi_tick(encode_world(DATA), 200))
+        )
+
 
 def encode_world(world):
     bugs = set()
@@ -22,6 +91,13 @@ def decode_world(bugs):
     return world[:-1]
 
 
+def solve_gold(world):
+    history = [encode_world(world)]
+    while history[-1] not in history[:-1]:
+        history.append(tick(history[-1]))
+    return len(history[-1])
+
+
 def biodiversity_rating(bugs):
     world = decode_world(bugs).replace('\n', '')
     return sum(
@@ -31,63 +107,10 @@ def biodiversity_rating(bugs):
     )
 
 
-def solve_silver(world):
-    history = [encode_world(world)]
-    while history[-1] not in history[:-1]:
-        history.append(tick(history[-1]))
-    return biodiversity_rating(history[-1])
-
-
-class TestSilver(unittest.TestCase):
-    EXAMPLE_0 = '''
-        ....#
-        #..#.
-        #..##
-        ..#..
-        #....
-    '''.strip(' \n').replace(' ', '')
-
-    EXAMPLE_1 = '''
-        #..#.
-        ####.
-        ###.#
-        ##.##
-        .##..
-    '''.strip(' \n').replace(' ', '')
-
-    def test_code_decode(self):
-        self.assertEqual(
-            self.EXAMPLE_0,
-            decode_world(encode_world(self.EXAMPLE_0))
-        )
-
-    def test_example_0_tick(self):
-        bugs = encode_world(self.EXAMPLE_0)
+def multi_tick(bugs, i):
+    for _ in range(i):
         bugs = tick(bugs)
-        self.assertEqual(
-            self.EXAMPLE_1,
-            decode_world(bugs)
-        )
-
-    def test_example_0(self):
-        self.assertEqual(
-            2129920,
-            solve_silver(self.EXAMPLE_0)
-        )
-
-    DATA = '''
-        .##.#
-        ###..
-        #...#
-        ##.#.
-        .###.
-    '''.strip(' \n').replace(' ', '')
-
-    def test_assignement(self):
-        self.assertEqual(
-            1151290,
-            solve_silver(self.DATA)
-        )
+    return bugs
 
 
 def tick(old_universe):
@@ -121,7 +144,7 @@ def potential_living_cells(old_universe):
 
 
 def generate_neighbouring_locations(location):
-    return {
+    neighbours = {
         (location[0] + delta_x, location[1] + delta_y, location[2])
         for delta_x in (-1, 0, 1)
         for delta_y in (-1, 0, 1)
@@ -131,5 +154,29 @@ def generate_neighbouring_locations(location):
                 0 <= location[0] + delta_x <= 4
                 and
                 0 <= location[1] + delta_y <= 4
+                and
+                (location[0] + delta_x, location[1] + delta_y) != (2, 2)
         )
     }
+
+    # deeper
+    for case, inner_neighbours in (
+            ((1, 2), {(0, i, location[2] - 1) for i in range(5)}),
+            ((2, 1), {(i, 0, location[2] - 1) for i in range(5)}),
+            ((3, 2), {(4, i, location[2] - 1) for i in range(5)}),
+            ((2, 3), {(i, 4, location[2] - 1) for i in range(5)}),
+    ):
+        if (location[0], location[1]) == case:
+            neighbours = neighbours.union(inner_neighbours)
+
+    # more at the surface
+    if location[0] == 0:
+        neighbours.add((1, 2, location[2] + 1))
+    if location[0] == 4:
+        neighbours.add((3, 2, location[2] + 1))
+    if location[1] == 0:
+        neighbours.add((2, 1, location[2] + 1))
+    if location[1] == 4:
+        neighbours.add((2, 3, location[2] + 1))
+
+    return neighbours
